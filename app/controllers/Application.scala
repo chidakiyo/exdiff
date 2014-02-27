@@ -11,14 +11,14 @@ object Application extends Controller {
 
   def upload = Action(parse.multipartFormData) { request =>
 
-    for {
+    (for {
       src <- request.body.file("srcFile")
       dst <- request.body.file("dstFile")
-    } {
-      println(src.filename)
-      println(dst.filename)
+    } yield {
+      Ok { src.filename + " : " + dst.filename }
+    }).getOrElse {
+      Redirect(routes.Application.index).flashing("error" -> "Missing file")
     }
-    Ok("File uploaded")
 
     //    request.body.file("srcFile").map { srcfile =>
     //      import java.io.File

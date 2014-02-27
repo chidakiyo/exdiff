@@ -1,7 +1,16 @@
 @(message: String)
 
-@main("Welcome to Play") {
+@main("Welcome Excell-diff Application!") {
 
-    @play20.welcome(message)
+@helper.form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
+    
+	<p><span>input: </span><input type="file" name="srcFile" /></p>
+	<p><span>compare To: </span><input type="file" name="dstFile" /></p>
+    
+    <p>
+        <input type="submit">
+    </p>
+    
+}
 
 }

@@ -10,11 +10,15 @@ import java.io.FileInputStream
 import org.apache.poi.ss.usermodel.Sheet
 import scala.collection.Seq
 import scala.collection.mutable.ListBuffer
-import poi4s.RichCell
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import xls.Book
 import com.typesafe.scalalogging.slf4j.Logging
+import cell.Cell
+import cell.Eq
+import cell.Diff
+import java.util.ArrayList
+import net.arnx.jsonic.JSON._
 
 object Application extends Controller with Logging {
 
@@ -26,61 +30,63 @@ object Application extends Controller with Logging {
   def upload = Action(parse.multipartFormData) { request =>
     logger.info("START {}#{}", "Application", "upload")
 
+    var responseString: String = null
+
     (for {
       src <- request.body.file("srcFile")
       dst <- request.body.file("dstFile")
     } yield {
-      import java.io.File
+      for {
+        srcBook <- Book.create(src)
+        dstBook <- Book.create(dst)
+      } {
 
-      println("#################")
-      println(src.contentType)
+        val srcSheet = srcBook.getSheetAt(0) // TODO
+        val dstSheet = dstBook.getSheetAt(0) // TODO
 
-      val srcBook = Book.create(src)
-      val dstBook = Book.create(dst)
+        val srcCells = srcSheet toSeqs
+        val dstCells = dstSheet toSeqs
 
-      val srcSheet = srcBook.get.getSheetAt(0) // TODO
-      val dstSheet = dstBook.get.getSheetAt(0) // TODO
-
-      val a = new ListBuffer[RichCell]()
-      val b = new ListBuffer[RichCell]()
-      val srcCells = srcSheet filter { cell => a += cell; false }
-      val dstCells = dstSheet filter { cell => b += cell; false }
-
-      println("size : " + a.size)
-      println("size : " + b.size)
-
-      for ((sCell, dCell) <- a.zip(b)) {
-        if (sCell.text != dCell.text) {
-          println(sCell.text + " : " + dCell.text)
+        val checkResult = srcCells.zipAll(dstCells, null, null) map {
+          case (s, d) =>
+            Cell.diff(s, d)
         }
+
+        var line: Int = 0
+        var root: ArrayList[ArrayList[String]] = new ArrayList()
+        var tmp: ArrayList[String] = new ArrayList()
+        for (cell <- checkResult) {
+          (cell.getLineNo == line) match {
+            case true => {
+              line = cell.getLineNo
+              tmp add (cell match {
+                case c: Eq => c.left.text
+                case c: Diff => s"left:${c.left.text}, right:${c.right.text}"
+              })
+            }
+            case false => {
+              line = cell.getLineNo
+              root.add(tmp)
+              tmp = new ArrayList()
+
+              tmp add (cell match {
+                case c: Eq => c.left.text
+                case c: Diff => s"left:${c.left.text}, right:${c.right.text}"
+              })
+            }
+          }
+        }
+
+        responseString = encode(root)
       }
 
-      //      val list = new ListBuffer[String]()
-      //      sheet foreach { cell =>
-      //        val rownum = cell.row.getRowNum
-      //        list += <p>${ cell.text }</p>.toString
-      //      }
-
       Ok {
-        <div>
-          <p>src : ${ src.filename } : ${ src.contentType }</p>
-          <p>dst : ${ dst.filename } : ${ dst.contentType }</p>
-        </div>
-      }.as(HTML)
+        views.html.table("Your new application is ready.")(responseString)
+      }
     }).getOrElse {
       Redirect(routes.Application.index).flashing("error" -> "Missing file")
     }
 
-    //    request.body.file("srcFile").map { srcfile =>
-    //      import java.io.File
-    //      val filename = srcfile.filename
-    //      val contentType = srcfile.contentType
-    //      srcfile.ref.moveTo(new File("/tmp/picture"))
-    //      Ok("File uploaded")
-    //    }.getOrElse {
-    //      Redirect(routes.Application.index).flashing(
-    //        "error" -> "Missing file")
-    //    }
   }
 
 }

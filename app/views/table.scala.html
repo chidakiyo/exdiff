@@ -1,0 +1,19 @@
+@(message: String)(json:String)
+
+@main("Welcome Excell-diff Application!") {
+	
+	<div id="table" class="handsontable"></div>
+	
+	<script>
+		var data = @Html(json);
+		
+		$(function(){
+		
+  			$('#table').handsontable({
+    			data: data
+  			});
+
+		})
+	</script>
+
+}

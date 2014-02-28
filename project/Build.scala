@@ -13,6 +13,7 @@ object ApplicationBuild extends Build {
     "org.apache.poi" % "poi" % "3.9", // Excelファイル操作用
     "org.apache.poi" % "poi-ooxml" % "3.9", // POIのXSSF用のライブラリ
     "com.typesafe" %% "scalalogging-slf4j" % "1.0.1", // ロガー
+    "net.arnx" % "jsonic" % "1.3.1", // JSONIC
     jdbc,
     anorm)
 

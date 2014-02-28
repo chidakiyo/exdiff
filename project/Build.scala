@@ -12,6 +12,7 @@ object ApplicationBuild extends Build {
     "mysql" % "mysql-connector-java" % "5.1.21",
     "org.apache.poi" % "poi" % "3.9", // Excelファイル操作用
     "org.apache.poi" % "poi-ooxml" % "3.9", // POIのXSSF用のライブラリ
+    "com.typesafe" %% "scalalogging-slf4j" % "1.0.1", // ロガー
     jdbc,
     anorm)
 

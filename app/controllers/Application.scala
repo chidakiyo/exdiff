@@ -2,37 +2,29 @@ package controllers
 
 import play.api._
 import play.api.mvc._
+import poi4s.Implicit._
+import util.Keys.XlsType._
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.FileInputStream
-import poi4s.Implicit._
 import org.apache.poi.ss.usermodel.Sheet
 import scala.collection.Seq
 import scala.collection.mutable.ListBuffer
 import poi4s.RichCell
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import xls.Book
+import com.typesafe.scalalogging.slf4j.Logging
 
-object Application extends Controller {
-
-  val HSSF_XLS = "application/vnd.ms-excel"
-  val XSSF_XLS = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+object Application extends Controller with Logging {
 
   def index = Action {
+    logger.info("START {}#{}", "Application", "index")
     Ok(views.html.index("Your new application is ready."))
   }
 
-  def createBook(file: play.api.mvc.MultipartFormData.FilePart[play.api.libs.Files.TemporaryFile]): Workbook = {
-    val x = file.contentType map { typ =>
-      typ match {
-        case HSSF_XLS => new HSSFWorkbook(new POIFSFileSystem(new FileInputStream(file.ref.file)))
-        case XSSF_XLS => new XSSFWorkbook(new FileInputStream(file.ref.file))
-      }
-    }
-    x.getOrElse(null)
-  }
-
   def upload = Action(parse.multipartFormData) { request =>
+    logger.info("START {}#{}", "Application", "upload")
 
     (for {
       src <- request.body.file("srcFile")
@@ -43,11 +35,11 @@ object Application extends Controller {
       println("#################")
       println(src.contentType)
 
-      val srcBook = createBook(src)
-      val dstBook = createBook(dst)
+      val srcBook = Book.create(src)
+      val dstBook = Book.create(dst)
 
-      val srcSheet = srcBook.getSheetAt(0)
-      val dstSheet = dstBook.getSheetAt(0)
+      val srcSheet = srcBook.get.getSheetAt(0) // TODO
+      val dstSheet = dstBook.get.getSheetAt(0) // TODO
 
       val a = new ListBuffer[RichCell]()
       val b = new ListBuffer[RichCell]()

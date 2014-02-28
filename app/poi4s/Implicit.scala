@@ -149,10 +149,10 @@ object Implicit {
       list.toSeq
     }
 
-    def toSeqs(): Seq[Cell] = {
-      val a = new ListBuffer[Cell]()
-      foreach { cell => a += cell.cell; true }
-      a
+    def toSeq(): Seq[Cell] = {
+      val tmp = new ListBuffer[Cell]()
+      foreach { cell => tmp += cell.cell; true }
+      tmp
     }
 
     def filter(f: RichCell => Boolean): Seq[RichCell] = foreach { cell =>

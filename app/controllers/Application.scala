@@ -46,25 +46,22 @@ object Application extends Controller with Logging {
         val srcSheet = srcBook.getSheetAt(0) // TODO
         val dstSheet = dstBook.getSheetAt(0) // TODO
 
-        val srcCells = srcSheet toSeqs
-        val dstCells = dstSheet toSeqs
+        val srcCells = srcSheet toSeq
+        val dstCells = dstSheet toSeq
 
         val checkResult = srcCells.zipAll(dstCells, null, null) map {
           case (s, d) =>
             Cell.diff(s, d)
         }
 
-        var root: JList[JList[String]] = new ArrayList()
-
         val indexedValue = checkResult groupBy (_.getLineNo)
 
-        for (i <- Range(0, indexedValue.keys.max + 1)) {
+        val x: JList[JList[String]] = for (i <- Range(0, indexedValue.keys.max + 1)) yield {
           val value = indexedValue.get(i).get // TODO
-          val values: JList[String] = value map { c => c.getOutput }
-          root.add(values)
+          List((i + 1).toString) ++: (value map { c => c.getOutput }): JList[String]
         }
 
-        responseString = encode(root)
+        responseString = encode(x)
       }
 
       Ok {

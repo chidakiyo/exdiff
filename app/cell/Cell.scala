@@ -14,9 +14,9 @@ abstract class Cell {
 
   def getLineNo(): Int = {
     left match {
-      case l => l.rowNum
+      case l if (l != null) => l.rowNum
       case _ => right match {
-        case r => r.rowNum
+        case r if (r != null) => r.rowNum
         case _ => 0 // TODO
       }
     }
@@ -24,9 +24,9 @@ abstract class Cell {
 
   def getCellNo(): Int = {
     left match {
-      case l => l.getColumnIndex
+      case l if (l != null) => l.getColumnIndex
       case _ => right match {
-        case r => r.getColumnIndex
+        case r if (r != null) => r.getColumnIndex
         case _ => 0 // TODO
       }
     }

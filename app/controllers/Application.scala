@@ -4,6 +4,7 @@ import play.api._
 import play.api.mvc._
 import poi4s.Implicit._
 import util.Keys.XlsType._
+import collection.JavaConversions._
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.FileInputStream
@@ -19,6 +20,7 @@ import cell.Eq
 import cell.Diff
 import java.util.ArrayList
 import net.arnx.jsonic.JSON._
+import java.util.{ List => JList }
 
 object Application extends Controller with Logging {
 
@@ -52,29 +54,14 @@ object Application extends Controller with Logging {
             Cell.diff(s, d)
         }
 
-        var line: Int = 0
-        var root: ArrayList[ArrayList[String]] = new ArrayList()
-        var tmp: ArrayList[String] = new ArrayList()
-        for (cell <- checkResult) {
-          (cell.getLineNo == line) match {
-            case true => {
-              line = cell.getLineNo
-              tmp add (cell match {
-                case c: Eq => c.left.text
-                case c: Diff => s"left:${c.left.text}, right:${c.right.text}"
-              })
-            }
-            case false => {
-              line = cell.getLineNo
-              root.add(tmp)
-              tmp = new ArrayList()
+        var root: JList[JList[String]] = new ArrayList()
 
-              tmp add (cell match {
-                case c: Eq => c.left.text
-                case c: Diff => s"left:${c.left.text}, right:${c.right.text}"
-              })
-            }
-          }
+        val indexedValue = checkResult groupBy (_.getLineNo)
+
+        for (i <- Range(0, indexedValue.keys.max + 1)) {
+          val value = indexedValue.get(i).get // TODO
+          val values: JList[String] = value map { c => c.getOutput }
+          root.add(values)
         }
 
         responseString = encode(root)

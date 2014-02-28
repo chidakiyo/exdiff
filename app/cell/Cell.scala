@@ -32,6 +32,13 @@ abstract class Cell {
     }
   }
 
+  def getOutput(): String = {
+    this match {
+      case c: Eq => left.text
+      case c: Diff => s"1: $left : 2:$right"
+    }
+  }
+
 }
 
 case class Diff(left: PCell, right: PCell) extends Cell {

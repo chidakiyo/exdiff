@@ -12,4 +12,9 @@ object Keys {
     val EQUAL = "equal"
   }
 
+  object HttpParam {
+    val SRC_FILE = "srcFile"
+    val DST_FILE = "dstFile"
+  }
+
 }

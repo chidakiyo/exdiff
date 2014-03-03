@@ -21,7 +21,11 @@ abstract class Cell {
   def getOutput(): String = {
     this match {
       case c: Eq => left.text
-      case c: Diff => s"L: $left : R:$right"
+      case c: Diff => {
+        val l = if (left != null) left.text else "-"
+        val r = if (right != null) right.text else "-"
+        s"◀: $l\n▶:$r"
+      }
     }
   }
 
@@ -37,11 +41,12 @@ case class Eq(left: PCell, right: PCell, typename: String = EQUAL) extends Cell
 
 object Cell {
 
-  def diff(left: PCell, right: PCell): cell.Cell = {
-    (left.text == right.text) match {
-      case true => Eq(left, right)
-      case false => Diff(left, right)
+  def diff(left: Option[PCell], right: Option[PCell]): cell.Cell = {
+    (left, right) match {
+      case (Some(l), Some(r)) => { println("1 " + l + " : " + r); if (l.text == r.text || (l.text == null || l.text.trim.isEmpty) && (r.text == null || r.text.trim.isEmpty)) Eq(l, r) else Diff(l, r) }
+      case (Some(l), None) => { println(2); Diff(l, null) }
+      case (None, Some(r)) => { println("3 " + r); Diff(null, r) }
+      case (None, None) => { println(4); Diff(null, null) }
     }
-
   }
 }

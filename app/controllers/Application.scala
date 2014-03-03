@@ -21,6 +21,8 @@ import cell.Diff
 import java.util.ArrayList
 import net.arnx.jsonic.JSON._
 import java.util.{ List => JList }
+import util.Keys.HttpParam._
+import org.apache.poi.ss.usermodel.{ Cell => PCell }
 
 object Application extends Controller with Logging {
 
@@ -35,8 +37,8 @@ object Application extends Controller with Logging {
     var responseString: String = null
 
     (for {
-      src <- request.body.file("srcFile")
-      dst <- request.body.file("dstFile")
+      src <- request.body.file(SRC_FILE)
+      dst <- request.body.file(DST_FILE)
     } yield {
       for {
         srcBook <- Book.create(src)
@@ -46,24 +48,24 @@ object Application extends Controller with Logging {
         val srcSheet = srcBook.getSheetAt(0) // TODO
         val dstSheet = dstBook.getSheetAt(0) // TODO
 
-        val srcCells = srcSheet toSeq
-        val dstCells = dstSheet toSeq
+        val maxRow = List(srcSheet, dstSheet) filter (_ != null) map (_.getLastRowNum) max: Int
+        val maxCell = List(srcSheet, dstSheet) filter (_ != null) map (m => m.iterator map (_.getLastCellNum) max) max
 
-        val checkResult = srcCells.zipAll(dstCells, null, null) map {
-          case (s, d) =>
-            Cell.diff(s, d)
+        val result: JList[JList[String]] = new ArrayList()
+        for (row <- (0 to maxRow); col <- (0 until maxCell)) yield {
+          val s1 = srcSheet.getRow(row)
+          val s2 = dstSheet.getRow(row)
+          val c1: Option[PCell] = if (s1 != null) Some(s1.getCell(col)) else None
+          val c2: Option[PCell] = if (s2 != null) Some(s2.getCell(col)) else None
+          println(s"ROW: $row, COL: $col, C1: $c1, C2: $c2")
+          if (!result.isDefinedAt(row)) {
+            result.add(row, new ArrayList)
+          }
+          val tmpRow = result.get(row);
+          tmpRow.add(col, Cell.diff(c1, c2).getOutput)
         }
 
-        val indexedList = checkResult groupBy (_.getLineNo)
-
-        val x: JList[JList[String]] = for (i <- Range(0, indexedList.keys.max + 1)) yield {
-          val indexedLine = indexedList.get(i).get.groupBy(_.getCellNo) // TODO
-          (for (j <- Range(0, indexedLine.keys.max + 1)) yield {
-            indexedLine.get(j).get.get(0).getOutput
-          }): JList[String]
-        }
-
-        responseString = encode(x)
+        responseString = encode(result)
       }
 
       Ok {

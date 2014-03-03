@@ -58,11 +58,9 @@ object Application extends Controller with Logging {
 
         val x: JList[JList[String]] = for (i <- Range(0, indexedList.keys.max + 1)) yield {
           val indexedLine = indexedList.get(i).get.groupBy(_.getCellNo) // TODO
-          //          List((i + 1).toString) ++: 
           (for (j <- Range(0, indexedLine.keys.max + 1)) yield {
             indexedLine.get(j).get.get(0).getOutput
           }): JList[String]
-          //          List((i + 1).toString) ++: (value map { c => c.getOutput }): JList[String]
         }
 
         responseString = encode(x)

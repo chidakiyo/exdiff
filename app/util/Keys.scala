@@ -7,4 +7,9 @@ object Keys {
     val XSSF_XLS = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   }
 
+  object CellType {
+    val DIFF = "diff"
+    val EQUAL = "equal"
+  }
+
 }

@@ -30,7 +30,7 @@ abstract class Cell {
   }
 
   private def leftOrRight(left: PCell, right: PCell)(f: PCell => Int): Int = {
-    List(left, right) find (_ != null) map (f(_)) getOrElse (0) // TODO getOrElseは仮置き
+    List(left, right) find (_ != null) map (f(_)) getOrElse (0) // TODO getOrElse is temporary
   }
 
 }

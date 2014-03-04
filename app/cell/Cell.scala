@@ -43,10 +43,10 @@ object Cell {
 
   def diff(left: Option[PCell], right: Option[PCell]): cell.Cell = {
     (left, right) match {
-      case (Some(l), Some(r)) => { println("1 " + l + " : " + r); if (l.text == r.text || (l.text == null || l.text.trim.isEmpty) && (r.text == null || r.text.trim.isEmpty)) Eq(l, r) else Diff(l, r) }
-      case (Some(l), None) => { println(2); Diff(l, null) }
-      case (None, Some(r)) => { println("3 " + r); Diff(null, r) }
-      case (None, None) => { println(4); Diff(null, null) }
+      case (Some(l), Some(r)) => { if (l.text == r.text || (l.text == null || l.text.trim.isEmpty) && (r.text == null || r.text.trim.isEmpty)) Eq(l, r) else Diff(l, r) }
+      case (Some(l), None) => { Diff(l, null) }
+      case (None, Some(r)) => { Diff(null, r) }
+      case (None, None) => { Diff(null, null) }
     }
   }
 }

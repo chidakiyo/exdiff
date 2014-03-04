@@ -23,27 +23,27 @@ import net.arnx.jsonic.JSON._
 import java.util.{ List => JList }
 import util.Keys.HttpParam._
 import org.apache.poi.ss.usermodel.{ Cell => PCell }
+import util.ControlUtil._
+import org.apache.poi.ss.usermodel.Row
 
 object Application extends Controller with Logging {
 
   def index = Action {
     logger.info("START {}#{}", "Application", "index")
-    Ok(views.html.index("Your new application is ready."))
+    Ok(views.html.index(""))
   }
 
   def upload = Action(parse.multipartFormData) { request =>
     logger.info("START {}#{}", "Application", "upload")
 
-    var responseString: String = null
-
     (for {
       src <- request.body.file(SRC_FILE)
       dst <- request.body.file(DST_FILE)
     } yield {
-      for {
+      val response = for {
         srcBook <- Book.create(src)
         dstBook <- Book.create(dst)
-      } {
+      } yield {
 
         val srcSheet = srcBook.getSheetAt(0) // TODO
         val dstSheet = dstBook.getSheetAt(0) // TODO
@@ -52,29 +52,28 @@ object Application extends Controller with Logging {
         val maxCell = List(srcSheet, dstSheet) filter (_ != null) map (m => m.iterator map (_.getLastCellNum) max) max
 
         val result: JList[JList[String]] = new ArrayList()
-        for (row <- (0 to maxRow); col <- (0 until maxCell)) yield {
-          val s1 = srcSheet.getRow(row)
-          val s2 = dstSheet.getRow(row)
-          val c1: Option[PCell] = if (s1 != null) Some(s1.getCell(col)) else None
-          val c2: Option[PCell] = if (s2 != null) Some(s2.getCell(col)) else None
-          println(s"ROW: $row, COL: $col, C1: $c1, C2: $c2")
-          if (!result.isDefinedAt(row)) {
-            result.add(row, new ArrayList)
-          }
-          val tmpRow = result.get(row);
-          tmpRow.add(col, Cell.diff(c1, c2).getOutput)
+        for (row <- (0 to maxRow); col <- (0 until maxCell)) {
+          val getRow = (row: Row, col: Int) => { if (row != null) Some(row.getCell(col)) else None }
+          val c1: Option[PCell] = getRow(srcSheet.getRow(row), col)
+          val c2: Option[PCell] = getRow(dstSheet.getRow(row), col)
+          if (!result.isDefinedAt(row)) { result.add(row, initRow(row)) }
+          result.get(row).add(col, Cell.diff(c1, c2).getOutput)
         }
-
-        responseString = encode(result)
+        encode(result)
       }
 
       Ok {
-        views.html.table("Your new application is ready.")(responseString)
+        views.html.table("Your new application is ready.")(response.orNull)
       }
     }).getOrElse {
       Redirect(routes.Application.index).flashing("error" -> "Missing file")
     }
 
+  }
+
+  def initRow(row: Int): ArrayList[String] = {
+    val l = new ArrayList[String]
+    l
   }
 
 }

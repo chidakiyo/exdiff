@@ -12,7 +12,10 @@
 		$(function(){
 		
   			$('#table').handsontable({
-    			data: data
+    			data: data,
+    			colHeaders: true,
+    			rowHeaders: true,
+				contextMenu: true
   			});
   			
   			$('#table table').addClass('table, table-bordered, table-condenced, table-striped');

@@ -4,6 +4,8 @@ import play.api._
 import play.api.mvc._
 import poi4s.Implicit._
 import util.Keys.XlsType._
+import util.Keys.HttpParam._
+import util.Keys.SheetMap._
 import collection.JavaConversions._
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -21,7 +23,6 @@ import cell.Diff
 import java.util.ArrayList
 import net.arnx.jsonic.JSON._
 import java.util.{ List => JList }
-import util.Keys.HttpParam._
 import org.apache.poi.ss.usermodel.{ Cell => PCell }
 import util.ControlUtil._
 import org.apache.poi.ss.usermodel.Row
@@ -33,8 +34,15 @@ object Application extends Controller with Logging {
     Ok(views.html.index(""))
   }
 
-  def upload = Action(parse.multipartFormData) { request =>
+  import play.api.data._
+  import play.api.data.Forms._
+
+  val sheetForm = Form(tuple("srcSheet" -> nonEmptyText, "dstSheet" -> nonEmptyText))
+
+  def upload = Action(parse.multipartFormData) { implicit request =>
     logger.info("START {}#{}", "Application", "upload")
+
+    val (sheet1, sheet2) = sheetForm.bindFromRequest.get
 
     (for {
       src <- request.body.file(SRC_FILE)
@@ -45,8 +53,8 @@ object Application extends Controller with Logging {
         dstBook <- Book.create(dst)
       } yield {
 
-        val srcSheet = srcBook.getSheetAt(0) // TODO correspond to multi sheet
-        val dstSheet = dstBook.getSheetAt(0) // TODO correspond to multi sheet
+        val srcSheet = srcBook.getSheetAt(SHEET_MAP.get(sheet1).get) // TODO if None return
+        val dstSheet = dstBook.getSheetAt(SHEET_MAP.get(sheet2).get) // TODO if None return 
 
         val maxRow = List(srcSheet, dstSheet) filter (_ != null) map (_.getLastRowNum) max: Int
         val maxCell = List(srcSheet, dstSheet) filter (_ != null) map (m => m.iterator map (_.getLastCellNum) max) max

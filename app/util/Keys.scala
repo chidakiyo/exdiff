@@ -1,5 +1,7 @@
 package util
 
+import scala.collection.immutable.Map
+
 object Keys {
 
   object XlsType {
@@ -15,6 +17,19 @@ object Keys {
   object HttpParam {
     val SRC_FILE = "srcFile"
     val DST_FILE = "dstFile"
+  }
+
+  object SheetMap {
+    val SHEET_MAP = Map(
+      "1" -> 1,
+      "2" -> 2,
+      "3" -> 3,
+      "4" -> 4,
+      "5" -> 5,
+      "6" -> 6,
+      "7" -> 7,
+      "8" -> 8,
+      "9" -> 9)
   }
 
 }

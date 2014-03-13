@@ -14,6 +14,10 @@ Following features are not implemented, but we will make them in the future rele
 
 Release Notes
 --------
+### 0.1.0 - 13 Mar 2014
+- Target Sheet selection
+
+
 ### 0.0.1 - 04 Mar 2014
 - Show simple Excel file diff.
 

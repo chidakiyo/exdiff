@@ -24,7 +24,7 @@ abstract class Cell {
       case c: Diff => {
         val l = if (left != null) left.text else "-"
         val r = if (right != null) right.text else "-"
-        s"◀: $l\n▶:$r"
+        s"◀: $l\n▶: $r"
       }
     }
   }
@@ -46,7 +46,7 @@ object Cell {
       case (Some(l), Some(r)) => { if (l.text == r.text || (l.text == null || l.text.trim.isEmpty) && (r.text == null || r.text.trim.isEmpty)) Eq(l, r) else Diff(l, r) }
       case (Some(l), None) => { Diff(l, null) }
       case (None, Some(r)) => { Diff(null, r) }
-      case (None, None) => { Diff(null, null) }
+      case (None, None) => { Eq(null, null) }
     }
   }
 }

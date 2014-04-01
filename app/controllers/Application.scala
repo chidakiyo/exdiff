@@ -26,6 +26,7 @@ import java.util.{ List => JList }
 import org.apache.poi.ss.usermodel.{ Cell => PCell }
 import util.ControlUtil._
 import org.apache.poi.ss.usermodel.Row
+import util.MaxUtil
 
 object Application extends Controller with Logging {
 
@@ -56,8 +57,8 @@ object Application extends Controller with Logging {
         val srcSheet = srcBook.getSheetAt(SHEET_MAP.get(sheet1).get) // TODO if None return
         val dstSheet = dstBook.getSheetAt(SHEET_MAP.get(sheet2).get) // TODO if None return 
 
-        val maxRow = List(srcSheet, dstSheet) filter (_ != null) map (_.getLastRowNum) max: Int
-        val maxCell = List(srcSheet, dstSheet) filter (_ != null) map (m => m.iterator map (_.getLastCellNum) max) max
+        val maxRow = MaxUtil.getLastRowNumMax(srcSheet, dstSheet)
+        val maxCell = MaxUtil.getColumnNumMaxSheets(srcSheet, dstSheet)
 
         val result: JList[JList[String]] = new ArrayList()
         for (row <- (0 to maxRow); col <- (0 until maxCell)) {

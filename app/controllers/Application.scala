@@ -63,8 +63,7 @@ object Application extends Controller with Logging {
         val result: JList[JList[String]] = new ArrayList()
         for (row <- (0 to maxRow); col <- (0 until maxCell)) {
           val getRow = (row: Row, col: Int) => { if (row != null) Some(row.getCell(col)) else None }
-          val c1: Option[PCell] = getRow(srcSheet.getRow(row), col)
-          val c2: Option[PCell] = getRow(dstSheet.getRow(row), col)
+          val (c1, c2) = (getRow(srcSheet.getRow(row), col), getRow(dstSheet.getRow(row), col))
           if (!result.isDefinedAt(row)) { result.add(row, initRow(row)) }
           result.get(row).add(col, Cell.diff(c1, c2).getOutput)
         }
